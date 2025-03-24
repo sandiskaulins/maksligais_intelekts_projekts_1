@@ -16,15 +16,26 @@ class Tree:
         self.nodes_list = []
         self.arc_dict = {}
         self.visited_nodes = {}
+        self.level_counters = {}  # Glabā nākamos indeksus katram līmenim #Chatgbpt
+
+    #ChatGbpt
+    def get_next_id(self, level):
+        if level not in self.level_counters:
+            self.level_counters[level] = 1  # Sākam skaitīt no 1
+        else:
+            self.level_counters[level] += 1  # Palielinām skaitītāju
+        return f"N.{level}.{self.level_counters[level]}"
 
     # Metode, kas pievieno jaunu virsotni spēles kokam un saglabā unikālo spēles stāvokli vārdnīcā
     def insert_node(self, Node):
         self.nodes_list.append(Node)
+        # ChatGpt
         key = (Node.num_string, Node.points, Node.bank)
         self.visited_nodes[key] = Node.id 
 
     # Metode, kas pievieno jaunu loku spēles kokam
     def insert_arc(self, start_id, end_id):
+        # ChatGpt
         if start_id not in self.arc_dict:
             self.arc_dict[start_id] = []
         if end_id not in self.arc_dict[start_id]:  # Pārbaude, vai loks jau pastāv
@@ -67,7 +78,7 @@ def generate_tree(node, tree):
         else:
         # Ja neeksistē veidojam jaunu virsotni un loku
             id = node.id
-            id1 = "N." + str(level) + "." + str(i+1)
+            id1 = tree.get_next_id(level)  # Globāls secīgs ID katrā līmenī #ChatGbt
             newNode = Node(id1,result,points,bank,level)
             tree.insert_node(newNode)
             tree.insert_arc(id, id1)
@@ -82,7 +93,7 @@ def generate_num_string():
     i = 0
     num_string = ""
     while(i<len_num_string):
-        num_string+= str(random.randint(0,9))
+        num_string+= str(random.randint(1,9))
         i+=1
     return num_string
 
@@ -102,7 +113,7 @@ def main():
     tree = Tree()
     root = Node("N.0.0", num_string, 0, 0, 0)
     tree.insert_node(root)
-    
+
     generate_tree(root, tree)
     
     print("Sākotnējā virkne:", root.num_string)
