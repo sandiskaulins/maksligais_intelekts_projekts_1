@@ -3,13 +3,12 @@ import random
 # Tiek izveidota klase, kas saturēs info par vienu virsotni kokā
 class Node:
     # Klases konstruktors, kas inicializē visas mainīgos, kas mainās spēles gaitā
-    def __init__(self, id, num_string, points, bank, level, player):
+    def __init__(self, id, num_string, points, bank, level):
         self.id = id
         self.num_string = num_string
         self.points = points
         self.bank = bank
         self.level = level
-        self.player = player
 
 # Tiek izveidota spēles koka klase
 class Tree:
@@ -82,8 +81,7 @@ def generate_tree(node, tree):
         # Ja neeksistē veidojam jaunu virsotni un loku
             id = node.id
             id1 = tree.get_next_id(level)  # Globāls secīgs ID katrā līmenī #ChatGbt
-            next_player = 'dators' if node.player == 'cilvēks' else 'cilvēks' # šo ieviesa chatgpt
-            newNode = Node(id1,result,points,bank,level,next_player)
+            newNode = Node(id1,result,points,bank,level)
             tree.insert_node(newNode)
             tree.insert_arc(id, id1)
         # Kamēr virknes garums nav 1 dodamies dziļāk kokā
