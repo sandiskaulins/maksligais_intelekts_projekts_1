@@ -3,12 +3,14 @@ import random
 # Tiek izveidota klase, kas saturēs info par vienu virsotni kokā
 class Node:
     # Klases konstruktors, kas inicializē visas mainīgos, kas mainās spēles gaitā
-    def __init__(self, id, num_string, points, bank, level):
+    def __init__(self, id, num_string, points, bank, level, player):
         self.id = id
         self.num_string = num_string
         self.points = points
         self.bank = bank
         self.level = level
+        self.player = player
+
 # Tiek izveidota spēles koka klase
 class Tree:
     # Tiek izveidots konstruktors, kas inicializē virsotņu, loku un apmeklēto virsotņu kopas
@@ -17,6 +19,7 @@ class Tree:
         self.arc_dict = {}
         self.visited_nodes = {}
         self.level_counters = {}  # Glabā nākamos indeksus katram līmenim #Chatgbpt
+        
 
     #ChatGbpt
     def get_next_id(self, level):
@@ -79,7 +82,8 @@ def generate_tree(node, tree):
         # Ja neeksistē veidojam jaunu virsotni un loku
             id = node.id
             id1 = tree.get_next_id(level)  # Globāls secīgs ID katrā līmenī #ChatGbt
-            newNode = Node(id1,result,points,bank,level)
+            next_player = 'dators' if node.player == 'cilvēks' else 'cilvēks' # šo ieviesa chatgpt
+            newNode = Node(id1,result,points,bank,level,next_player)
             tree.insert_node(newNode)
             tree.insert_arc(id, id1)
         # Kamēr virknes garums nav 1 dodamies dziļāk kokā
@@ -87,6 +91,20 @@ def generate_tree(node, tree):
                 generate_tree(newNode,tree)
 
 # Funkcija virknes ģenerēšanai
+# def generate_num_string():
+#     print("Ievadiet virknes garumu")
+#     len_num_string = int(input())
+#     if (15 <= len_num_string <= 25):
+#         i = 0
+#         num_string = ""
+#         while(i<len_num_string):
+#             num_string+= str(random.randint(1,9))
+#             i+=1
+#         return num_string
+#     else :
+#         print("Ievadiet skaitļu virknes garumu no 15 līdz 25 ieskaitot")
+#         return generate_num_string()
+
 def generate_num_string():
     print("Ievadiet virknes garumu")
     len_num_string = int(input())
@@ -106,15 +124,29 @@ def result_check(points,bank):
     else:
         print("Neizšķirts")
 
+def kurssākspēli():
+    print("Kurš sāk spēli, ja cilvēks ieraksti c, ja dators ieraksti d")
+    ievade = input()
+    ievade = ievade.lower()
+    if (ievade == "c"):
+        return 'cilvēks' # šis tika ģenerēts ar AI es nesapratu kā pabeigt šo 
+    elif (ievade == "d"):
+        return 'dators' # un šī rinda
+    else: 
+        print("Mēģinat velreiz, kurš sāk spēli cilvēks vai dators, ja vēlaties, lai cilvēks sāk rakstat c, bet ja dators d ")
+        return kurssākspēli()
+
 def heiristiska_novertejuma_funkcija(starting_player, num_string_len, points, bank):
     # Katram jāimplementē viens faktors
     print("")
-    
+
+
 # Galvenā funkcija - ar ko sākas programma
 def main():
     num_string = generate_num_string()
     tree = Tree()
-    root = Node("N.0.0", num_string, 0, 0, 0)
+    spēletājaizvēli = kurssākspēli()
+    root = Node("N.0.0", num_string, 0, 0, 0, spēletājaizvēli) # un šo rindu AI modificēja ar to spēletājaizvēli
     tree.insert_node(root)
 
     generate_tree(root, tree)
@@ -122,7 +154,7 @@ def main():
     print("Sākotnējā virkne:", root.num_string)
 
     for x in tree.nodes_list:
-        print(x.id,x.num_string,x.points,x.bank,x.level)
+        print(x.id,x.num_string,x.points,x.bank,x.level,x.player)
     
     for x, y in tree.arc_dict.items():
         print(x, y)   
