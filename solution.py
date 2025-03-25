@@ -125,11 +125,10 @@ def result_check(points,bank):
 def kurssākspēli():
     print("Kurš sāk spēli, ja cilvēks ieraksti c, ja dators ieraksti d")
     ievade = input()
-    ievade = ievade.lower()
     if (ievade == "c"):
-        return 'cilvēks' # šis tika ģenerēts ar AI es nesapratu kā pabeigt šo 
+        return "cilvēks"
     elif (ievade == "d"):
-        return 'dators' # un šī rinda
+        return "dators"
     else: 
         print("Mēģinat velreiz, kurš sāk spēli cilvēks vai dators, ja vēlaties, lai cilvēks sāk rakstat c, bet ja dators d ")
         return kurssākspēli()
@@ -162,8 +161,8 @@ def heiristiska_novertejuma_funkcija(starting_player, num_string_len, points, ba
 def main():
     num_string = generate_num_string()
     tree = Tree()
-    spēletājaizvēli = kurssākspēli()
-    root = Node("N.0.0", num_string, 0, 0, 0, spēletājaizvēli) # un šo rindu AI modificēja ar to spēletājaizvēli
+    #player = kurssākspēli()
+    root = Node("N.0.0", num_string, 0, 0, 0) 
     tree.insert_node(root)
 
     generate_tree(root, tree)
