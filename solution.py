@@ -144,18 +144,18 @@ def heiristiska_novertejuma_funkcija(starting_player, num_string_len, points, ba
             score += 10 # += 10 nozīmē, ka šis stāvoklis ir izdevīgs datoram, jo tas mēģina lai abi būtu pāra skaitļi, tādējadi +10 ir heiristiskas funkcijas vērtējums 
         elif points % 2 == 1 and bank % 2 == 1: # ja abi skaitļi ir nepāra, tad šis nav izdevīgi datoram, jo tad uzvarēs cilvēks
             score -=10 # līdz ar to heiristiskas funkcijas vērtējums ir -10
+        else:
+            score +=5 # nav izdevīgi datoram un nav izdevīgi cilvēkam, bet labāk, kā zaudējums
                 
     else: # ja cilvēks sāk spēli
         if points % 2 == 1 and bank % 2 == 1:
-            score +=10 # šis stavoklis ir labvēlīgs datoram, gadījumā ja cilvēks sāk spēli, jo datora mērķi ir iegūt nepār skaitļus
+            score +=10 # šis stavoklis ir labvēlīgs datoram, gadījumā ja cilvēks sāk spēli, jo datora mērķis ir iegūt nepāra skaitļus
         elif points % 2 == 0 and bank % 2 == 0:
             score -= 10 # šis stāvoklis ir nelabvēlīgs datoram, līdz ar to heiristiskas funkc vērtējums -10
+        else:
+            score +=5 # nav izdevīgi datoram un nav izdevīgi cilvēkam, bet labāk, kā zaudējums
 
-    return score
-    # šis faktors ir domāts tā, ka dators cenšas izvairīties no tiem gājieniem, kuri dos -1 punktu, jo tas neļaus datoram kontrolēt spēles gaitu, vēlāk būs grūtāk atgriezties pie pāra sk.
-    # tādējādi dators meklēs tos gājienus kuros ir iespējam iegūt +1 punktu kop. skaitam. Gājieni kur summa = 7, ir neitrāli izdevīgi, jo tie vēlāk var novest pie neizšķirta.
-    # P.S. Ielikšu so koda daļa visu zem komentāra, lai pārliecinātos ka viss pareizi, jo pats neesmu pārliecināts vai pareizi sapratu domu. """"
-                
+    return score             
 
 # Galvenā funkcija - ar ko sākas programma
 def main():
