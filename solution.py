@@ -145,11 +145,11 @@ def heiristiska_novertejuma_funkcija(starting_player, num_string_len, points, ba
         elif points % 2 == 1 and bank % 2 == 1: # ja abi skaitļi ir nepāra, tad šis nav izdevīgi datoram, jo tad uzvarēs cilvēks
             score -=10 # līdz ar to heiristiskas funkcijas vērtējums ir -10
                 
-        else: # ja cilvēks sāk spēli
-            if points % 2 == 1 and bank % 2 == 1:
-                score +=10 # šis stavoklis ir labvēlīgs datoram, gadījumā ja cilvēks sāk spēli, jo datora mērķi ir iegūt nepār skaitļus
-            elif points % 2 == 0 and bank % 2 == 0:
-                score -= 10 # šis stāvoklis ir nelabvēlīgs datoram, līdz ar to heiristiskas funkc vērtējums -10
+    else: # ja cilvēks sāk spēli
+        if points % 2 == 1 and bank % 2 == 1:
+            score +=10 # šis stavoklis ir labvēlīgs datoram, gadījumā ja cilvēks sāk spēli, jo datora mērķi ir iegūt nepār skaitļus
+        elif points % 2 == 0 and bank % 2 == 0:
+            score -= 10 # šis stāvoklis ir nelabvēlīgs datoram, līdz ar to heiristiskas funkc vērtējums -10
 
     return score
     # šis faktors ir domāts tā, ka dators cenšas izvairīties no tiem gājieniem, kuri dos -1 punktu, jo tas neļaus datoram kontrolēt spēles gaitu, vēlāk būs grūtāk atgriezties pie pāra sk.
