@@ -122,22 +122,47 @@ def result_check(points,bank):
     else:
         print("Neizšķirts")
 
+# starting_player =' '
+
 def kurssākspēli():
     print("Kurš sāk spēli, ja cilvēks ieraksti c, ja dators ieraksti d")
     ievade = input()
     if (ievade == "c"):
+        # starting_player = 'cilvēks'
         return "cilvēks"
     elif (ievade == "d"):
+        # starting_player = 'dators'
         return "dators"
     else: 
         print("Mēģinat velreiz, kurš sāk spēli cilvēks vai dators, ja vēlaties, lai cilvēks sāk rakstat c, bet ja dators d ")
         return kurssākspēli()
 
-def heiristiska_novertejuma_funkcija(starting_player, num_string_len, points, bank):
-    # Katram jāimplementē viens faktors
-    print("")
     
-def heiristiska_novertejuma_funkcija(starting_player, num_string_len, points, bank):
+def get_children(node): # visu uzrakstija chats nav manis modificēts šis 
+    # Iegūstam visus iespējamos bērnus (iespējamie gājieni)
+    children = []
+    num_string = list(node.num_string)
+    for i in range(len(num_string)-1):  # Pāriem visiem iespējamiem pāriem
+        new_num_string = num_string[:]
+        pair_value = int(new_num_string[i]) + int(new_num_string[i+1])
+        points = node.points
+        bank = node.bank
+
+        if pair_value > 7:
+            new_num_string[i] = "1"
+            points += 1
+        elif pair_value < 7:
+            new_num_string[i] = "3"
+            points -= 1
+        else:
+            new_num_string[i] = "2"
+            bank += 1
+
+        new_num_string.pop(i+1)
+        children.append(Node("N." + str(node.level + 1), "".join(new_num_string), points, bank, node.level + 1))
+    return children
+
+def heiristiska_novertejuma_funkcija_dziļumam(starting_player, points, bank):
     score = 0
     if starting_player == "dators":
         if points % 2 == 0 and bank % 2 == 0: # ja dators sāk spēli, tad tā mērķis ir iegūt gan kop. skaitu, gan bankas kā pāra skaitli
@@ -156,6 +181,64 @@ def heiristiska_novertejuma_funkcija(starting_player, num_string_len, points, ba
             score +=5 # nav izdevīgi datoram un nav izdevīgi cilvēkam, bet labāk, kā zaudējums
 
     return score             
+
+def heiristiska_novertejuma_funkcija(starting_player, points, bank,heiristisks_vērtējuma_punkti):
+    heiristisks_vērtējuma_punkti = 0
+    if (starting_player == 'dators'):
+        if(((points%2)==0) and ((bank%2)==0)):
+            heiristisks_vērtējuma_punkti = 1
+        elif(((points%2)==1) and ((bank%2)==1)):
+            heiristisks_vērtējuma_punkti = -1
+        else:
+            heiristisks_vērtējuma_punkti = 0
+    else:
+        if(((points%2)==0) and ((bank%2)==0)):
+            heiristisks_vērtējuma_punkti = -1
+        elif(((points%2)==1) and ((bank%2)==1)):
+            heiristisks_vērtējuma_punkti = 1
+        else:
+            heiristisks_vērtējuma_punkti = 0 
+    return heiristisks_vērtējuma_punkti
+
+def minimax (starting_player, dzilums, node, next_player, heiristiskafunkcija, len_num_string):
+    if (len_num_string <= 17): # ja virknes garums nav lielāks par 17
+        num_string = list(node.num_string) # Pārveido virkni uz saraktstu
+        if (len(node.num_string) == 1):   # kad mūsu virknē palika tikai 1 simbols
+            return heiristiska_novertejuma_funkcija   # piešķiram tam 1 0 -1 
+
+        if (starting_player == 'dators'):  #maksimizētais 
+            sakumavertiba = -float('inf')  # Sākam ar ļoti negatīvu vērtību
+            for child in get_children(node):  # Iegūstam visus bērnus (iespējamos gājienus)
+                
+            # spēles stāvokli mēs varam uzzināt no root = Node("N.0.0", num_string, 0, 0, 0) 
+            # id N.0.0 - ir virsotne ar simbolu virkni ģenereto num_string, tālāk ir point 0, tālāk ir bank 0, ir līmenis 0)
+            # pēc līmeņiem man ir jāsadala min max atkarībā no tā kurš spēli
+            # ar num_string mums jaatrod kad palika viens tad jāpiešķir heiristiskanovertejumafunkcijas 1 0 -1, balstoties uz points un bank
+
+            
+# def minimax(maksimizetajs, minimizetajs, dzilums, starting_player, points, bank, node, heiristiskafunkcija, next_player):
+#     num_string = list(node.num_string)  
+#     if len(node.num_string) == 1:
+#         if starting_player == 'dators':
+#             next_player = 'cilvēks'  
+#             if maksimizetajs:  
+#                 heiristiskafunkcija = heiristiska_novertejuma_funkcija('dators', points, bank)# šī rinda chats
+#         else:
+#             next_player = 'dators'  
+#             if minimizetajs:  
+#                 heiristiskafunkcija = heiristiska_novertejuma_funkcija('cilvēks', points, bank) # šī rinda chats
+
+#         return heiristiskafunkcija
+
+    # if (heiristisks_vērtējuma_punkti > heiristisks_vērtējuma_punkti nākamajā gājienā):
+    #     slikts gajiens
+    # elif (heiristisks_vērtējuma_punkti < heiristisks_vērtējuma_punkti nākamajā gājienā):
+    #     labs gājiens
+    # else:
+    #     nekas namainās nav slikti
+
+
+
 
 # Galvenā funkcija - ar ko sākas programma
 def main():
