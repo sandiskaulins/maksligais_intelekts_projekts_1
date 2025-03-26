@@ -199,7 +199,7 @@ def heiristiska_novertejuma_funkcija(starting_player, points, bank,heiristisks_v
         else:
             heiristisks_vērtējuma_punkti = 0 
     return heiristisks_vērtējuma_punkti
-
+# šeit daļeji no https://www.geeksforgeeks.org/mini-max-algorithm-in-artificial-intelligence/ un koda loģikas un chata
 def minimax (starting_player, dzilums, node, next_player, heiristiskafunkcija, len_num_string):
     if (len_num_string <= 17): # ja virknes garums nav lielāks par 17
         num_string = list(node.num_string) # Pārveido virkni uz saraktstu
@@ -209,13 +209,28 @@ def minimax (starting_player, dzilums, node, next_player, heiristiskafunkcija, l
         if (starting_player == 'dators'):  #maksimizētais 
             sakumavertiba = -float('inf')  # Sākam ar ļoti negatīvu vērtību
             for child in get_children(node):  # Iegūstam visus bērnus (iespējamos gājienus)
-                
-            # spēles stāvokli mēs varam uzzināt no root = Node("N.0.0", num_string, 0, 0, 0) 
-            # id N.0.0 - ir virsotne ar simbolu virkni ģenereto num_string, tālāk ir point 0, tālāk ir bank 0, ir līmenis 0)
-            # pēc līmeņiem man ir jāsadala min max atkarībā no tā kurš spēli
-            # ar num_string mums jaatrod kad palika viens tad jāpiešķir heiristiskanovertejumafunkcijas 1 0 -1, balstoties uz points un bank
 
-            
+# chats man šo piedavā
+
+# # Ja ir maksimizējošais spēlētājs (dators)
+#     if maksimizetajs:
+#         max_eval = -float('inf')  # Sākam ar ļoti negatīvu vērtību
+#         for action in actions(node):  # Iterējam pa visiem iespējamiem gājieniem
+#             new_node = result(node, action)  # Pārveidojam stāvokli pēc gājiena
+#             eval = minimax(False, dzilums - 1, new_node, heiristiskafunkcija)  # Rekursīvi izsaucam minimax, pārejot pie cilvēka
+#             max_eval = max(max_eval, eval)  # Izvēlamies maksimālo vērtējumu
+#         return max_eval  # Atgriežam maksimālo vērtējumu
+
+#     # Ja ir minimizējošais spēlētājs (cilvēks)
+#     else:
+#         min_eval = float('inf')  # Sākam ar ļoti pozitīvu vērtību
+#         for action in actions(node):  # Iterējam pa visiem iespējamiem gājieniem
+#             new_node = result(node, action)  # Pārveidojam stāvokli pēc gājiena
+#             eval = minimax(True, dzilums - 1, new_node, heiristiskafunkcija)  # Rekursīvi izsaucam minimax, pārejot pie datora
+#             min_eval = min(min_eval, eval)  # Izvēlamies minimālo vērtējumu
+#         return min_eval  # Atgriežam minimālo vērtējumu
+
+# šeit es domāju ka, tā izskatās minimax
 # def minimax(maksimizetajs, minimizetajs, dzilums, starting_player, points, bank, node, heiristiskafunkcija, next_player):
 #     num_string = list(node.num_string)  
 #     if len(node.num_string) == 1:
@@ -230,6 +245,8 @@ def minimax (starting_player, dzilums, node, next_player, heiristiskafunkcija, l
 
 #         return heiristiskafunkcija
 
+
+# šis lejā ir piezīmes 
     # if (heiristisks_vērtējuma_punkti > heiristisks_vērtējuma_punkti nākamajā gājienā):
     #     slikts gajiens
     # elif (heiristisks_vērtējuma_punkti < heiristisks_vērtējuma_punkti nākamajā gājienā):
@@ -237,7 +254,10 @@ def minimax (starting_player, dzilums, node, next_player, heiristiskafunkcija, l
     # else:
     #     nekas namainās nav slikti
 
-
+            # spēles stāvokli mēs varam uzzināt no root = Node("N.0.0", num_string, 0, 0, 0) 
+            # id N.0.0 - ir virsotne ar simbolu virkni ģenereto num_string, tālāk ir point 0, tālāk ir bank 0, ir līmenis 0)
+            # pēc līmeņiem man ir jāsadala min max atkarībā no tā kurš spēli
+            # ar num_string mums jaatrod kad palika viens tad jāpiešķir heiristiskanovertejumafunkcijas 1 0 -1, balstoties uz points un bank
 
 
 # Galvenā funkcija - ar ko sākas programma
