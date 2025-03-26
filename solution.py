@@ -46,6 +46,7 @@ class Tree:
 # Funkcija, kas izveido spēles koku rekursīvi
 def generate_tree(node, tree):
     num_string = list(node.num_string) # Pārveido virkni uz saraktstu
+    possible_actions = [] 
     for i in range(len(num_string)-1): # Cikls 1 līmeņa visu virsotņu izveidei
 
         pairValue = int(num_string[i]) + int(num_string[i+1]) # Blakus esošo skaitļu summa
@@ -87,6 +88,10 @@ def generate_tree(node, tree):
         # Kamēr virknes garums nav 1 dodamies dziļāk kokā
             if len(new_num_string)>1:
                 generate_tree(newNode,tree)
+
+
+        possible_actions.append((new_num_string, points, bank, level))
+    return possible_actions
 
 # Funkcija virknes ģenerēšanai
 # def generate_num_string():
@@ -137,30 +142,6 @@ def kurssākspēli():
         print("Mēģinat velreiz, kurš sāk spēli cilvēks vai dators, ja vēlaties, lai cilvēks sāk rakstat c, bet ja dators d ")
         return kurssākspēli()
 
-    
-def get_children(node): # visu uzrakstija chats nav manis modificēts šis 
-    # Iegūstam visus iespējamos bērnus (iespējamie gājieni)
-    children = []
-    num_string = list(node.num_string)
-    for i in range(len(num_string)-1):  # Pāriem visiem iespējamiem pāriem
-        new_num_string = num_string[:]
-        pair_value = int(new_num_string[i]) + int(new_num_string[i+1])
-        points = node.points
-        bank = node.bank
-
-        if pair_value > 7:
-            new_num_string[i] = "1"
-            points += 1
-        elif pair_value < 7:
-            new_num_string[i] = "3"
-            points -= 1
-        else:
-            new_num_string[i] = "2"
-            bank += 1
-
-        new_num_string.pop(i+1)
-        children.append(Node("N." + str(node.level + 1), "".join(new_num_string), points, bank, node.level + 1))
-    return children
 
 def heiristiska_novertejuma_funkcija_dziļumam(starting_player, points, bank):
     score = 0
@@ -182,84 +163,50 @@ def heiristiska_novertejuma_funkcija_dziļumam(starting_player, points, bank):
 
     return score             
 
-def heiristiska_novertejuma_funkcija(starting_player, points, bank,heiristisks_vērtējuma_punkti):
-    heiristisks_vērtējuma_punkti = 0
-    if (starting_player == 'dators'):
-        if(((points%2)==0) and ((bank%2)==0)):
-            heiristisks_vērtējuma_punkti = 1
-        elif(((points%2)==1) and ((bank%2)==1)):
-            heiristisks_vērtējuma_punkti = -1
+def utility(starting_player, points, bank):
+    if(((points%2)==0) and ((bank%2)==0)):
+        if (starting_player == 'dators'):
+            return 1
         else:
-            heiristisks_vērtējuma_punkti = 0
+            return -1
+    elif(((points%2)==1) and ((bank%2)==1)):
+        if (starting_player == 'dators'):
+            return -1
+        else:
+            return 1
     else:
-        if(((points%2)==0) and ((bank%2)==0)):
-            heiristisks_vērtējuma_punkti = -1
-        elif(((points%2)==1) and ((bank%2)==1)):
-            heiristisks_vērtējuma_punkti = 1
-        else:
-            heiristisks_vērtējuma_punkti = 0 
-    return heiristisks_vērtējuma_punkti
-# šeit daļeji no https://www.geeksforgeeks.org/mini-max-algorithm-in-artificial-intelligence/ un koda loģikas un chata
-def minimax (starting_player, dzilums, node, next_player, heiristiskafunkcija, len_num_string):
-    if (len_num_string <= 17): # ja virknes garums nav lielāks par 17
-        num_string = list(node.num_string) # Pārveido virkni uz saraktstu
-        if (len(node.num_string) == 1):   # kad mūsu virknē palika tikai 1 simbols
-            return heiristiska_novertejuma_funkcija   # piešķiram tam 1 0 -1 
-
-        if (starting_player == 'dators'):  #maksimizētais 
-            sakumavertiba = -float('inf')  # Sākam ar ļoti negatīvu vērtību
-            for child in get_children(node):  # Iegūstam visus bērnus (iespējamos gājienus)
-
-# chats man šo piedavā
-
-# # Ja ir maksimizējošais spēlētājs (dators)
-#     if maksimizetajs:
-#         max_eval = -float('inf')  # Sākam ar ļoti negatīvu vērtību
-#         for action in actions(node):  # Iterējam pa visiem iespējamiem gājieniem
-#             new_node = result(node, action)  # Pārveidojam stāvokli pēc gājiena
-#             eval = minimax(False, dzilums - 1, new_node, heiristiskafunkcija)  # Rekursīvi izsaucam minimax, pārejot pie cilvēka
-#             max_eval = max(max_eval, eval)  # Izvēlamies maksimālo vērtējumu
-#         return max_eval  # Atgriežam maksimālo vērtējumu
-
-#     # Ja ir minimizējošais spēlētājs (cilvēks)
-#     else:
-#         min_eval = float('inf')  # Sākam ar ļoti pozitīvu vērtību
-#         for action in actions(node):  # Iterējam pa visiem iespējamiem gājieniem
-#             new_node = result(node, action)  # Pārveidojam stāvokli pēc gājiena
-#             eval = minimax(True, dzilums - 1, new_node, heiristiskafunkcija)  # Rekursīvi izsaucam minimax, pārejot pie datora
-#             min_eval = min(min_eval, eval)  # Izvēlamies minimālo vērtējumu
-#         return min_eval  # Atgriežam minimālo vērtējumu
-
-# šeit es domāju ka, tā izskatās minimax
-# def minimax(maksimizetajs, minimizetajs, dzilums, starting_player, points, bank, node, heiristiskafunkcija, next_player):
-#     num_string = list(node.num_string)  
-#     if len(node.num_string) == 1:
-#         if starting_player == 'dators':
-#             next_player = 'cilvēks'  
-#             if maksimizetajs:  
-#                 heiristiskafunkcija = heiristiska_novertejuma_funkcija('dators', points, bank)# šī rinda chats
-#         else:
-#             next_player = 'dators'  
-#             if minimizetajs:  
-#                 heiristiskafunkcija = heiristiska_novertejuma_funkcija('cilvēks', points, bank) # šī rinda chats
-
-#         return heiristiskafunkcija
+        return 0
 
 
-# šis lejā ir piezīmes 
-    # if (heiristisks_vērtējuma_punkti > heiristisks_vērtējuma_punkti nākamajā gājienā):
-    #     slikts gajiens
-    # elif (heiristisks_vērtējuma_punkti < heiristisks_vērtējuma_punkti nākamajā gājienā):
-    #     labs gājiens
-    # else:
-    #     nekas namainās nav slikti
+def minimax(node, len_num_string, maximizingplayer: bool, starting_player, points, bank, tree):
+    if len_num_string <= 17:  
+        num_string = list(node.num_string)  
+        if len(node.num_string) == 1: 
+            return utility(starting_player, points, bank)
 
-            # spēles stāvokli mēs varam uzzināt no root = Node("N.0.0", num_string, 0, 0, 0) 
-            # id N.0.0 - ir virsotne ar simbolu virkni ģenereto num_string, tālāk ir point 0, tālāk ir bank 0, ir līmenis 0)
-            # pēc līmeņiem man ir jāsadala min max atkarībā no tā kurš spēli
-            # ar num_string mums jaatrod kad palika viens tad jāpiešķir heiristiskanovertejumafunkcijas 1 0 -1, balstoties uz points un bank
+    possible_actions = generate_tree(node, tree)  
 
+    if maximizingplayer:
+        maxvalue = float('-inf')
+        for action in possible_actions:
+            new_num_string, updated_points, updated_bank = action
+            new_state = Node(node.id, "".join(new_num_string), updated_points, updated_bank, node.level + 1)
+            value = minimax(new_state, len(new_state.num_string), False, starting_player, updated_points, updated_bank, tree)
+            maxvalue = max(maxvalue, value) 
 
+        return maxvalue
+
+    else:
+        minvalue = float('inf')
+        for action in possible_actions:
+            new_num_string, updated_points, updated_bank = action
+            new_state = Node(node.id, "".join(new_num_string), updated_points, updated_bank, node.level + 1)
+            value = minimax(new_state, len(new_state.num_string), True, starting_player, updated_points, updated_bank, tree)
+            minvalue = min(minvalue, value)  
+
+        return minvalue
+
+        
 # Galvenā funkcija - ar ko sākas programma
 def main():
     num_string = generate_num_string()
