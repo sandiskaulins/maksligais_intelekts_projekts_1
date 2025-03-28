@@ -13,12 +13,13 @@ class Node:
 # Tiek izveidota spēles koka klase
 class Tree:
     # Tiek izveidots konstruktors, kas inicializē virsotņu, loku un apmeklēto virsotņu kopas
-    def __init__(self):
+    def __init__(self, max_level=None):
         self.nodes_list = []
         self.arc_dict = {}
         self.visited_nodes = {}
         self.level_counters = {}  # Glabā nākamos indeksus katram līmenim #Chatgbpt
-        
+        self.max_level = max_level
+
 
     #ChatGbpt
     def get_next_id(self, level):
@@ -86,7 +87,7 @@ def generate_tree(node, tree):
             tree.insert_node(newNode)
             tree.insert_arc(id, id1)
         # Kamēr virknes garums nav 1 dodamies dziļāk kokā
-            if len(new_num_string)>1:
+            if (len(new_num_string)>1) and (tree.max_level is None or level < tree.max_level):
                 generate_tree(newNode,tree)
 
 
@@ -110,7 +111,7 @@ def generate_tree(node, tree):
 
 def generate_num_string():
     print("Ievadiet virknes garumu")
-    len_num_string = int(input())
+    len_num_string = int(input()) # te vajag pievienot pārbaudi lai cilvēks skaitļu virknē neievada burtus, savadāk būs kļūda valueerroe
     i = 0
     num_string = ""
     while(i<len_num_string):
@@ -129,7 +130,7 @@ def result_check(points,bank):
 
 # starting_player =' '
 
-def kurssākspēli():
+def kurssākspēli(): # chat ieteica palabot lai nebūtu iecikļošana pec 1000 reizes kad raksti nepareizi ar while True 
     print("Kurš sāk spēli, ja cilvēks ieraksti c, ja dators ieraksti d")
     ievade = input()
     if (ievade == "c"):
@@ -177,12 +178,19 @@ def utility(starting_player, points, bank):
     else:
         return 0
 
+def new_tree(last_node):
+    tree1 = Tree()
+    last_node.id = "N.1.1."
+    last_node.level = 1
+    tree1.insert_node(last_node)
+    generate_tree(last_node, tree1)
+    return tree1
 
-def minimax(node, len_num_string, maximizingplayer: bool, starting_player, points, bank, tree):
-    if len_num_string <= 17:  
-        num_string = list(node.num_string)  
-        if len(node.num_string) == 1: 
-            return utility(starting_player, points, bank)
+def minimax(node, maximizingplayer: bool, starting_player, points, bank, tree):
+    if (len(node.num_string) == 1):
+        return utility(starting_player, points, bank)
+    if (node.level >=10):
+        return heiristiska_novertejuma_funkcija_dziļumam(starting_player, points, bank)
 
     possible_actions = generate_tree(node, tree)  
 
@@ -190,8 +198,9 @@ def minimax(node, len_num_string, maximizingplayer: bool, starting_player, point
         maxvalue = float('-inf')
         for action in possible_actions:
             new_num_string, updated_points, updated_bank = action
+            new_id = tree.get_next_id(node.level + 1)
             new_state = Node(node.id, "".join(new_num_string), updated_points, updated_bank, node.level + 1)
-            value = minimax(new_state, len(new_state.num_string), False, starting_player, updated_points, updated_bank, tree)
+            value = minimax(new_state, len(new_state.num_string), False, starting_player, updated_points, updated_bank, tree) # chats raksta šādi value = minimax(new_state, False, starting_player, tree) jo node objekts if(len(node...)returnutility šajā vietā) jau satur tos pārējos laukus 
             maxvalue = max(maxvalue, value) 
 
         return maxvalue
@@ -200,30 +209,53 @@ def minimax(node, len_num_string, maximizingplayer: bool, starting_player, point
         minvalue = float('inf')
         for action in possible_actions:
             new_num_string, updated_points, updated_bank = action
+            new_id = tree.get_next_id(node.level + 1)
             new_state = Node(node.id, "".join(new_num_string), updated_points, updated_bank, node.level + 1)
             value = minimax(new_state, len(new_state.num_string), True, starting_player, updated_points, updated_bank, tree)
             minvalue = min(minvalue, value)  
 
         return minvalue
 
-        
+      
 # Galvenā funkcija - ar ko sākas programma
 def main():
     num_string = generate_num_string()
-    tree = Tree()
-    #player = kurssākspēli()
-    root = Node("N.0.0", num_string, 0, 0, 0) 
-    tree.insert_node(root)
-
-    generate_tree(root, tree)
+    if len(num_string) < 16: 
+        tree = Tree(max_level=None)
+        player = kurssākspēli()
+        root = Node("N.1.1", num_string, 0, 0, 1) 
+        tree.insert_node(root)
+        generate_tree(root, tree)
+    else: 
+        tree = Tree(max_level=10)
+        player = kurssākspēli()
+        root = Node("N.1.1", num_string, 0, 0, 1) 
+        tree.insert_node(root)
+        generate_tree(root, tree)
+    
+    last_node = None
+        # Tīri pārbaudei
+    for x in reversed(tree.nodes_list):  # Sākam no beigām, lai atrastu pēdējo 10. līmeņa virsotni
+        if x.level == 10:
+            last_node = x
+            break
+    tree1 = new_tree(last_node)
+        
+    #for x in tree1.nodes_list:
+        #print(x.id,x.num_string,x.points,x.bank,x.level)
+    
+    #for x, y in tree1.arc_dict.items():
+        #print(x, y)
     
     print("Sākotnējā virkne:", root.num_string)
 
-    for x in tree.nodes_list:
-        print(x.id,x.num_string,x.points,x.bank,x.level)
+    #for x in tree.nodes_list:
+        #print(x.id,x.num_string,x.points,x.bank,x.level)
     
-    for x, y in tree.arc_dict.items():
-        print(x, y)   
+    #for x, y in tree.arc_dict.items():
+        #print(x, y)
+
+    print("Kods Galā")   
         
 if __name__ == "__main__":
     main()
