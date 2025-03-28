@@ -217,28 +217,27 @@ def minimax(node, maximizingplayer: bool, starting_player, points, bank):
 
         return minvalue
 
-def alpha_beta_minmax(state, depth, alpha, beta, maximizing_player, num_string):
-    # Pārbaude, vai virkne ir līdz 16 simboliem
-    root = Node("N.0.1", num_string, state.points, state.bank, 0) 
-    if len(num_string) <= 16: 
+def alpha_beta_minmax(state, depth, alpha, beta, maximizing_player, num_string, starting_player):
+    root = Node("N.0.1", num_string, state.points, state.bank, 0)
+    if len(num_string) <= 16:
         tree = Tree(max_level=None)
-    else: 
-        tree = Tree(max_level=10) 
+    else:
+        tree = Tree(max_level=10)
 
     tree.insert_node(root)
-    possible_actions = generate_tree(root, tree) # Generē iespējamos koka zarus
+    possible_actions = generate_tree(root, tree)  # Generē iespējamos koka zarus
 
     if len(state.num_string) <= 16 or depth == 0:
-        return utility(state.starting_player, state.points, state.bank)
+        return utility(starting_player, state.points, state.bank)
     if len(state.num_string) <= 10:
-        return heiristiska_novertejuma_funkcija_dziļumam(state.starting_player, state.points, state.bank)
+        return heiristiska_novertejuma_funkcija_dziļumam(starting_player, state.points, state.bank)
 
     if maximizing_player:
         max_eval = float('-inf')
         for action in possible_actions:
-            new_num_string, updated_points, updated_bank = action
+            new_num_string, updated_points, updated_bank, level = action  
             new_state = Node(state.id, "".join(new_num_string), updated_points, updated_bank, state.level + 1)
-            eval = alpha_beta_minmax(new_state, depth - 1, alpha, beta, False)
+            eval = alpha_beta_minmax(new_state, depth - 1, alpha, beta, False, num_string, starting_player)  
             max_eval = max(max_eval, eval)
             alpha = max(alpha, eval)
             if beta <= alpha:
@@ -247,9 +246,9 @@ def alpha_beta_minmax(state, depth, alpha, beta, maximizing_player, num_string):
     else:
         min_eval = float('inf')
         for action in possible_actions:
-            new_num_string, updated_points, updated_bank = action
+            new_num_string, updated_points, updated_bank, level = action  
             new_state = Node(state.id, "".join(new_num_string), updated_points, updated_bank, state.level + 1)
-            eval = alpha_beta_minmax(new_state, depth - 1, alpha, beta, True)
+            eval = alpha_beta_minmax(new_state, depth - 1, alpha, beta, True, num_string, starting_player)  
             min_eval = min(min_eval, eval)
             beta = min(beta, eval)
             if beta <= alpha:
@@ -270,26 +269,27 @@ def which_alg():
         return which_alg()
 # Galvenā funkcija - ar ko sākas programma
 def main():
-    num_string = generate_num_string() # Ģenerējam skaitļu virkni
-    algoritma_izvele = which_alg() # izvēlamies algoritmu
+    num_string = generate_num_string()  # Ģenerējam skaitļu virkni
+    algoritma_izvele = which_alg()  # Izvēlamies algoritmu
     starting_player = kurs_sak()
 
     print("Sākotnējā virkne:", num_string)
 
-    if(algoritma_izvele == "minimax"):
-        root = Node("N.0.1", num_string, 0, 0, 0) 
-        if(starting_player=="dators"):
-            minimax(root,True,starting_player,0,0)
+    root = Node("N.0.1", num_string, 0, 0, 0)
+
+    if algoritma_izvele == "minimax":
+        if starting_player == "dators":
+            minimax(root, True, starting_player, 0, 0)
         else:
-            minimax(root,False,starting_player,0,0)
+            minimax(root, False, starting_player, 0, 0)
     else:
-        if(starting_player=="dators"):
-            alpha_beta_minmax()
+        if starting_player == "dators":
+            alpha_beta_minmax(root, depth=10, alpha=float('-inf'), beta=float('inf'), maximizing_player=True, num_string=num_string, starting_player=starting_player)
         else:
-            alpha_beta_minmax()
+            alpha_beta_minmax(root, depth=10, alpha=float('-inf'), beta=float('inf'), maximizing_player=False, num_string=num_string, starting_player=starting_player)
 
+    print("Kods Galā")
+    
 
-    print("Kods Galā")   
-        
 if __name__ == "__main__":
     main()
