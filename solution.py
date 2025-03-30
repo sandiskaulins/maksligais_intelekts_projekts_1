@@ -1,4 +1,6 @@
 import random
+import tkinter as tk
+from tkinter import messagebox
 
 # Tiek izveidota klase, kas saturēs info par vienu virsotni kokā
 class Node:
@@ -290,6 +292,74 @@ def main():
 
     print("Kods Galā")
     
+# --------------------------------GUI-----------------------------------------------
+class GameGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Divspēlētāju Spēle")
+
+        # Virsraksts
+        tk.Label(root, text="Spēles uzstādījumi", font=("Helvetica", 16)).pack(pady=10)
+
+        # Ievada virknes garumu
+        tk.Label(root, text="Virknes garums (15–25):").pack()
+        self.length_entry = tk.Entry(root)
+        self.length_entry.pack()
+
+        # izvelas kurs sak
+        tk.Label(root, text="Kurš sāk spēli:").pack(pady=5)
+        self.starting_player = tk.StringVar(value="cilvēks")
+        tk.Radiobutton(root, text="Cilvēks", variable=self.starting_player, value="cilvēks").pack()
+        tk.Radiobutton(root, text="Dators", variable=self.starting_player, value="dators").pack()
+
+        # Algoritma izvele
+        tk.Label(root, text="Izvēlies algoritmu:").pack(pady=5)
+        self.algorithm = tk.StringVar(value="minimax")
+        tk.Radiobutton(root, text="Minimakss", variable=self.algorithm, value="minimax").pack()
+        tk.Radiobutton(root, text="Alfa-beta", variable=self.algorithm, value="alfa-beta").pack()
+
+        # Start poga
+        tk.Button(root, text="Sākt spēli", command=self.start_game).pack(pady=10)
+
+    def start_game(self):
+        # Parbauda ciparus
+        try:
+            length = int(self.length_entry.get())
+            if not (15 <= length <= 25):
+                raise ValueError
+        # Error handling
+        except ValueError:
+            messagebox.showerror("Kļūda", "Nepareizs cipars")
+            return
+
+        # Genere nr (string)
+        num_string = ''.join(str(random.randint(1, 9)) for _ in range(length))
+        starting_player = self.starting_player.get()
+        algorithm = self.algorithm.get()
+        
+        #Terminali parada, kas sāk u.t.t
+        print("Sākotnējā virkne:", num_string)
+        print("Sāk spēli:", starting_player)
+        print("Algoritms:", algorithm)
+
+        # Izveido root node
+        root_node = Node("N.0.1", num_string, 0, 0, 0)
+
+        # Palaiž algrotmu ChatGpt
+        if algorithm == "minimax":
+            if starting_player == "dators":
+                minimax(root_node, True, starting_player, 0, 0)
+            else:
+                minimax(root_node, False, starting_player, 0, 0)
+        else:
+            if starting_player == "dators":
+                alpha_beta_minmax(root_node, depth=10, alpha=float('-inf'), beta=float('inf'), maximizing_player=True, num_string=num_string, starting_player=starting_player)
+            else:
+                alpha_beta_minmax(root_node, depth=10, alpha=float('-inf'), beta=float('inf'), maximizing_player=False, num_string=num_string, starting_player=starting_player)
+        # rezultatu ekrans 
+        messagebox.showinfo("Rezultāts", "Spēle pabeigta, rezultāti konsolē.")
 
 if __name__ == "__main__":
-    main()
+    root = tk.Tk()
+    app = GameGUI(root)
+    root.mainloop()
