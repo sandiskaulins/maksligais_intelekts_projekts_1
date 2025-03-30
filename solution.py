@@ -363,7 +363,7 @@ class GameScreen:
             self.end_game()
         else:
             # Parāda, kurš tagad veic gājienu
-            self.status_label.config(text="Tavs gājiens!" if self.player_turn else "Dators domā...")
+            self.status_label.config(text="Tev gajiens" if self.player_turn else "Datora gajiens")
             if not self.player_turn:
                 self.root.after(1000, self.computer_move)  # Dators veic gājienu pēc nelielas pauzes
 
@@ -405,11 +405,11 @@ class GameScreen:
 
         # Noteic uzvarētāju
         if winner == 1:
-            result = "Uzvar dators!" if self.starting_player == "dators" else "Tu uzvarēji!"
+            result = "Uzvar dators" if self.starting_player == "dators" else "Tu uzvarēji!"
         elif winner == -1:
-            result = "Tu uzvarēji!" if self.starting_player == "dators" else "Uzvar dators!"
+            result = "Tu uzvarēji" if self.starting_player == "dators" else "Uzvar dators!"
         else:
-            result = "Neizšķirts!"
+            result = "Neizšķirts"
 
         # Parāda rezultātu ziņojumā
         messagebox.showinfo("Spēles beigas", f"{result}\nVirkne: {''.join(self.current_string)}\nPunkti: {self.points}\nBanka: {self.bank}")
