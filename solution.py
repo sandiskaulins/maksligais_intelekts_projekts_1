@@ -257,6 +257,33 @@ def alpha_beta_minmax(state, depth, alpha, beta, maximizing_player, num_string, 
                 break  # Alfa nogriešana
         return min_eval
     
+# Funkcija, kas izvēlas labāko iespējamo datora gājienu, balstoties uz heuristiku
+def best_computer_move(num_string, points, bank, starting_player, algorithm):
+    node = Node("N.0.1", num_string, points, bank, 0)  # Izveido sākuma virsotni
+    tree = Tree(max_level=5)  # Izveido koku ar ierobežotu dziļumu
+    tree.insert_node(node)  # Pievieno saknes virsotni kokam
+    actions = generate_tree(node, tree)  # Ģenerē visus iespējamos nākamos stāvokļus
+
+    best_score = float('-inf')  # Sākotnēji labākais rezultāts ir ļoti zems
+    best_action = None  # Saglabās labāko atrasto darbību
+
+    for action in actions:
+        new_str, new_points, new_bank, _ = action  # Atrod nākamo stāvokli
+        new_node = Node("tmp", "".join(new_str), new_points, new_bank, 1)  # Izveido pagaidu virsotni
+
+        # Izvērtē stāvokli ar izvēlēto algoritmu
+        if algorithm == "minimax":
+            score = heiristiska_novertejuma_funkcija_dziļumam(starting_player, new_points, new_bank)
+        else:
+            score = heiristiska_novertejuma_funkcija_dziļumam(starting_player, new_points, new_bank)
+
+        # Saglabā labāko gājienu
+        if score > best_score:
+            best_score = score
+            best_action = action
+
+    return best_action  # Atgriež labāko izvēlēto gājienu
+  
 # Funkcija algoritma noteikšanai 
 
 def which_alg():
@@ -293,71 +320,156 @@ def main():
     print("Kods Galā")
     
 # --------------------------------GUI-----------------------------------------------
+# Klase, kas veido spēles galveno ekrānu un ļauj veikt gājienus
+class GameScreen:
+    def __init__(self, root, num_string, starting_player, algorithm):
+        self.root = root  # Galvenais tkinter logs
+        self.algorithm = algorithm  # Izvēlētais algoritms
+        self.starting_player = starting_player  # Kurš sāk spēli
+        self.current_string = list(num_string)  # Skaitļu virkne kā saraksts
+        self.points = 0  # Sākotnējie punkti
+        self.bank = 0  # Sākotnējā banka
+        self.player_turn = (starting_player == "cilvēks")  # True, ja cilvēks sāk
+
+        self.frame = tk.Frame(self.root)  # Galvenais spēles ietvars
+        self.frame.pack()
+
+        self.status_label = tk.Label(self.frame, text="", font=("Helvetica", 12))  # Informācija par gājienu
+        self.status_label.pack(pady=5)
+
+        self.string_frame = tk.Frame(self.frame)  # Ietvars virknes attēlošanai
+        self.string_frame.pack()
+
+        self.stats_label = tk.Label(self.frame, text="")  # Parāda punktus un banku
+        self.stats_label.pack(pady=5)
+
+        self.refresh_ui()  # Uzzīmē sākuma ekrānu
+
+    # Atjauno spēles ekrānu pēc katra gājiena
+    def refresh_ui(self):
+        for widget in self.string_frame.winfo_children():
+            widget.destroy()  # Notīra iepriekšējo virkni
+
+        # Izveido pogas katram skaitļu pārim
+        for i in range(len(self.current_string)-1):
+            btn = tk.Button(self.string_frame, text=f"{self.current_string[i]} {self.current_string[i+1]}", command=lambda i=i: self.player_move(i))
+            btn.grid(row=0, column=i, padx=2)
+
+        # Atjauno punktu un bankas informāciju
+        self.stats_label.config(text=f"Virkne: {''.join(self.current_string)} | Punkti: {self.points} | Banka: {self.bank}")
+
+        # Ja palicis tikai viens skaitlis, spēle beidzas
+        if len(self.current_string) == 1:
+            self.end_game()
+        else:
+            # Parāda, kurš tagad veic gājienu
+            self.status_label.config(text="Tavs gājiens!" if self.player_turn else "Dators domā...")
+            if not self.player_turn:
+                self.root.after(1000, self.computer_move)  # Dators veic gājienu pēc nelielas pauzes
+
+    # Apstrādā cilvēka izvēlēto gājienu
+    def player_move(self, index):
+        if not self.player_turn or index >= len(self.current_string)-1:
+            return  # Ja nav cilvēka gājiens vai kļūdains indekss
+
+        a = int(self.current_string[index])
+        b = int(self.current_string[index+1])
+        pair_sum = a + b
+
+        # Aizvieto pārīti pēc spēles noteikumiem
+        if pair_sum > 7:
+            self.current_string[index] = "1"
+            self.points += 1
+        elif pair_sum < 7:
+            self.current_string[index] = "3"
+            self.points -= 1
+        else:
+            self.current_string[index] = "2"
+            self.bank += 1
+
+        self.current_string.pop(index+1)  # Noņem otru skaitli no virknes
+        self.player_turn = False  # Pāriet pie datora gājiena
+        self.refresh_ui()  # Atjauno skatu
+
+    # Funkcija, kas izsauc datora gājienu
+    def computer_move(self):
+        move = best_computer_move("".join(self.current_string), self.points, self.bank, self.starting_player, self.algorithm)
+        if move:
+            self.current_string, self.points, self.bank, _ = move  # Atjauno stāvokli
+        self.player_turn = True  # Pāriet atpakaļ pie cilvēka
+        self.refresh_ui()
+
+    # Funkcija, kas izvada rezultātu un atgriež sākuma ekrānu
+    def end_game(self):
+        winner = utility(self.starting_player, self.points, self.bank)
+
+        # Noteic uzvarētāju
+        if winner == 1:
+            result = "Uzvar dators!" if self.starting_player == "dators" else "Tu uzvarēji!"
+        elif winner == -1:
+            result = "Tu uzvarēji!" if self.starting_player == "dators" else "Uzvar dators!"
+        else:
+            result = "Neizšķirts!"
+
+        # Parāda rezultātu ziņojumā
+        messagebox.showinfo("Spēles beigas", f"{result}\nVirkne: {''.join(self.current_string)}\nPunkti: {self.points}\nBanka: {self.bank}")
+
+        # Atiestata GUI uz sākuma ekrānu
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        GameGUI(self.root)
+
+
+        
+# Klase, kas veido sākuma izvēlni ar lietotāja ievadi
 class GameGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Divspēlētāju Spēle")
+        self.root.title("Divspēlētāju Spēle")  # Logs nosaukums
 
-        # Virsraksts
-        tk.Label(root, text="Spēles uzstādījumi", font=("Helvetica", 16)).pack(pady=10)
+        tk.Label(root, text="Spēles uzstādījumi", font=("Helvetica", 16)).pack(pady=10)  # Virsraksts
 
-        # Ievada virknes garumu
+        # Ievade virknes garumam
         tk.Label(root, text="Virknes garums (15–25):").pack()
         self.length_entry = tk.Entry(root)
         self.length_entry.pack()
 
-        # izvelas kurs sak
+        # Izvēle – kurš sāk spēli
         tk.Label(root, text="Kurš sāk spēli:").pack(pady=5)
         self.starting_player = tk.StringVar(value="cilvēks")
         tk.Radiobutton(root, text="Cilvēks", variable=self.starting_player, value="cilvēks").pack()
         tk.Radiobutton(root, text="Dators", variable=self.starting_player, value="dators").pack()
 
-        # Algoritma izvele
+        # Izvēle – kurš algoritms tiks izmantots
         tk.Label(root, text="Izvēlies algoritmu:").pack(pady=5)
         self.algorithm = tk.StringVar(value="minimax")
         tk.Radiobutton(root, text="Minimakss", variable=self.algorithm, value="minimax").pack()
         tk.Radiobutton(root, text="Alfa-beta", variable=self.algorithm, value="alfa-beta").pack()
 
-        # Start poga
+        # Poga spēles sākšanai
         tk.Button(root, text="Sākt spēli", command=self.start_game).pack(pady=10)
 
+    # Apstrādā sākuma formas datus un palaiž spēli
     def start_game(self):
-        # Parbauda ciparus
         try:
-            length = int(self.length_entry.get())
+            length = int(self.length_entry.get())  # Pārbauda, vai ievadīts skaitlis
             if not (15 <= length <= 25):
                 raise ValueError
-        # Error handling
         except ValueError:
-            messagebox.showerror("Kļūda", "Nepareizs cipars")
+            messagebox.showerror("Kļūda", "Nepareizs cipars")  # Kļūda, ja nav derīgs ievads
             return
 
-        # Genere nr (string)
-        num_string = ''.join(str(random.randint(1, 9)) for _ in range(length))
-        starting_player = self.starting_player.get()
-        algorithm = self.algorithm.get()
-        
-        #Terminali parada, kas sāk u.t.t
-        print("Sākotnējā virkne:", num_string)
-        print("Sāk spēli:", starting_player)
-        print("Algoritms:", algorithm)
+        num_string = ''.join(str(random.randint(1, 9)) for _ in range(length))  # Ģenerē virkni
+        starting_player = self.starting_player.get()  # Saglabā izvēlēto spēlētāju
+        algorithm = self.algorithm.get()  # Saglabā izvēlēto algoritmu
 
-        # Izveido root node
-        root_node = Node("N.0.1", num_string, 0, 0, 0)
+        # Notīra sākuma loga elementus
+        for widget in self.root.winfo_children():
+            widget.destroy()
 
-        # Palaiž algrotmu ChatGpt
-        if algorithm == "minimax":
-            if starting_player == "dators":
-                minimax(root_node, True, starting_player, 0, 0)
-            else:
-                minimax(root_node, False, starting_player, 0, 0)
-        else:
-            if starting_player == "dators":
-                alpha_beta_minmax(root_node, depth=10, alpha=float('-inf'), beta=float('inf'), maximizing_player=True, num_string=num_string, starting_player=starting_player)
-            else:
-                alpha_beta_minmax(root_node, depth=10, alpha=float('-inf'), beta=float('inf'), maximizing_player=False, num_string=num_string, starting_player=starting_player)
-        # rezultatu ekrans 
-        messagebox.showinfo("Rezultāts", "Spēle pabeigta, rezultāti konsolē.")
+        # Pāriet uz spēles ekrānu
+        GameScreen(self.root, num_string, starting_player, algorithm)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
