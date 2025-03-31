@@ -267,9 +267,9 @@ class GameScreen:
 
         # Noteic uzvarētāju
         if winner == 1:
-            result = "Uzvar dators" if self.starting_player == "dators" else "Tu uzvarēji!"
+            result = "Uzvar dators"
         elif winner == -1:
-            result = "Tu uzvarēji" if self.starting_player == "dators" else "Uzvar dators!"
+            result = "Tu uzvarēji"
         else:
             result = "Neizšķirts"
 
